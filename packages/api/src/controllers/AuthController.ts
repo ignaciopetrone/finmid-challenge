@@ -21,10 +21,10 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       const { password, ...userData } = user;
       const token = jwt.sign({ userData }, SECRET_KEY, { expiresIn: '1y' });
 
-      res.status(200).json({ token });
+      res.status(200).json({ token, user: userData });
     }
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 

@@ -1,37 +1,50 @@
-import { useEffect } from "react";
-import callApi from "./utils/callApi";
+import { ReactNode, useEffect } from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { useAppState } from './utils/appState';
+import Login from './components/organisms/login';
+import Dashboard from './components/organisms/dashboard';
 
-type LoginPayload = {
-  email: string;
-  password: string;
-};
+type ProtectRoutePorps = { route: ReactNode; user?: boolean };
 
-const login = async ({ email, password }: LoginPayload) => {
-  try {
-    const { token } = await callApi({
-      method: "POST",
-      endpoint: "/login",
-      payload: { email, password },
-    });
-    return token;
-  } catch (error) {}
+const ProtectRoute = ({ route: RouteToProtect, user }: ProtectRoutePorps) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  } else {
+    return <>{RouteToProtect}</>;
+  }
 };
 
 const App = () => {
+  const { user, resolvers } = useAppState();
+
   useEffect(() => {
     (async () => {
-      const token = await login({
-        email: "gandalf.the.grey@test.com",
-        password: "123code",
-      });
-      console.log("token", token);
+      // await resolvers.login('gandalf.the.grey@test.com', '123code');
     })();
   }, []);
 
   return (
     <div className="app">
-      <div className="app__header">HEADER</div>
-      <div className="app__body">BODY</div>
+      <div className="app__header">
+        {user && <p>Welcome {user?.name}</p>}
+        {user && (
+          <button onClick={resolvers.logout} style={{ height: '30px' }}>
+            LOGOUT
+          </button>
+        )}
+      </div>
+      <div className="app__body">
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+
+            <Route
+              path="/"
+              element={<ProtectRoute route={<Dashboard />} user={!!user} />}
+            />
+          </Routes>
+        </BrowserRouter>
+      </div>
       <div className="app__footer">FOOTER</div>
     </div>
   );
