@@ -1,0 +1,43 @@
+html,
+body,
+#root,
+.app {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  background-color: #eee;
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    background-color: red;
+    min-height: 110px;
+    display: flex;
+    justify-content: center;
+  }
+
+  &__body {
+    background-color: blue;
+    flex-grow: 1;
+  }
+
+  &__body,
+  &__footer {
+    max-width: 1400px;
+    width: -webkit-fill-available;
+    align-self: center;
+  }
+
+  &__footer {
+    height: 110px;
+    display: grid;
+    background-color: #fff;
+
+    p {
+      margin: auto 0 auto 80px;
+    }
+  }
+}
