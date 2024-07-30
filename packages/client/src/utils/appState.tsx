@@ -12,6 +12,8 @@ type User = {
 export type ContextValue = {
   user?: User;
   token?: User;
+  isLoading: boolean;
+  setLoading: (isLoading: boolean) => void;
   resolvers: {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -22,6 +24,7 @@ const StateContext = createContext<ContextValue>({} as ContextValue);
 
 export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
+  const [isLoading, setLoading] = useState(false);
 
   const login = async (email: string, password: string) => {
     try {
@@ -47,7 +50,14 @@ export const StateProvider = ({ children }: any) => {
   };
 
   return (
-    <StateContext.Provider value={{ user: user, resolvers: { login, logout } }}>
+    <StateContext.Provider
+      value={{
+        user: user,
+        isLoading,
+        setLoading,
+        resolvers: { login, logout },
+      }}
+    >
       {children}
     </StateContext.Provider>
   );

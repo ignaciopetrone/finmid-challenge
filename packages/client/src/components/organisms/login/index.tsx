@@ -1,33 +1,16 @@
 import { Field, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppState } from '../../../utils/appState';
 import { runValidation } from '../../../utils/validations';
+import { wait } from '../../../utils/wait';
 import Button from '../../atoms/button';
-import LoadingSpinner from '../../atoms/loadingSpinner';
 import TextField from '../../molecules/TextField';
 import './styles.scss';
 
 const Login = () => {
-  const { resolvers, user } = useAppState();
-  const [spinner, setSpinner] = useState(false);
+  const { resolvers, user, isLoading, setLoading } = useAppState();
   const navigate = useNavigate();
-
-  const initialValues = {
-    email: '',
-    password: '',
-  };
-
-  const onSubmit = async (values: { email: string; password: string }) => {
-    try {
-      setSpinner(true);
-      await resolvers.login(values.email, values.password);
-      setSpinner(false);
-      navigate('/');
-    } catch (error: any) {
-      setSpinner(false); // Stop spinner on error
-    }
-  };
 
   useEffect(() => {
     if (user) {
@@ -35,13 +18,23 @@ const Login = () => {
     }
   }, [user]);
 
-  if (spinner) {
-    return <LoadingSpinner />;
-  }
+  const initialValues = {
+    email: '',
+    password: '',
+  };
+
+  const onSubmit = async (values: { email: string; password: string }) => {
+    setLoading(true);
+    try {
+      await wait(3000);
+      await resolvers.login(values.email, values.password);
+      setLoading(false);
+    } catch (error: any) {}
+  };
 
   return (
     <div className="auth">
-      <Formik initialValues={initialValues} onSubmit={onSubmit}>
+      <Formik initialValues={initialValues} onSubmit={onSubmit} noValidate>
         <Form className="auth__form">
           <h2 className="auth__headline">Sign In</h2>
           <div className="form__field-container">
@@ -63,7 +56,9 @@ const Login = () => {
             />
           </div>
           <div className="form__field-container auth__button">
-            <Button type="submit">Sign In</Button>
+            <Button type="submit" isLoading={isLoading}>
+              Sign In
+            </Button>
           </div>
         </Form>
       </Formik>
