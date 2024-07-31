@@ -1,7 +1,7 @@
 import { Field, Form, Formik } from 'formik';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppState } from '../../../utils/appState';
+import { LOADING_TYPES, useAppState } from '../../../utils/appState';
 import { runValidation } from '../../../utils/validations';
 import { wait } from '../../../utils/wait';
 import Button from '../../atoms/button';
@@ -24,12 +24,15 @@ const Login = () => {
   };
 
   const onSubmit = async (values: { email: string; password: string }) => {
-    setLoading(true);
+    setLoading(LOADING_TYPES.authLogin);
     try {
       await wait(2000);
       await resolvers.login(values.email, values.password);
-      setLoading(false);
-    } catch (error: any) {}
+    } catch (error: any) {
+      console.error('Error during login - ', error.message);
+    } finally {
+      setLoading(LOADING_TYPES.off);
+    }
   };
 
   return (
@@ -56,7 +59,10 @@ const Login = () => {
             />
           </div>
           <div className="form__field-container auth__button">
-            <Button type="submit" isLoading={isLoading}>
+            <Button
+              type="submit"
+              isLoading={isLoading === LOADING_TYPES.authLogin}
+            >
               Sign In
             </Button>
           </div>

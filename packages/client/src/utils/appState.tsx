@@ -12,8 +12,8 @@ type User = {
 export type ContextValue = {
   user?: User;
   token?: User;
-  isLoading: boolean;
-  setLoading: (isLoading: boolean) => void;
+  isLoading: string;
+  setLoading: (isLoading: string) => void;
   resolvers: {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -22,14 +22,21 @@ export type ContextValue = {
 
 const StateContext = createContext<ContextValue>({} as ContextValue);
 
+export const LOADING_TYPES = {
+  off: '',
+  authCheck: 'auth:check',
+  authLogin: 'auth:login',
+  authLogout: 'auth:logout',
+};
+
 export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState('');
 
   useEffect(() => {
     // Automatically login the user if there is a valid token in cookie -> TODO: Abstract into custom hook
     const checkAuth = async () => {
-      setLoading(true);
+      setLoading(LOADING_TYPES.authCheck);
       try {
         const response = await callApi<{ user?: any }>({
           method: 'GET',
@@ -42,7 +49,7 @@ export const StateProvider = ({ children }: any) => {
       } catch (error: any) {
         console.error(error.message);
       } finally {
-        setLoading(false);
+        setLoading(LOADING_TYPES.off);
       }
     };
 
@@ -50,25 +57,17 @@ export const StateProvider = ({ children }: any) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const { user } = await callApi({
-        method: 'POST',
-        endpoint: '/login',
-        payload: { email, password },
-      });
-      setUser(user);
-    } catch (error) {
-      console.error('Error during login:', error);
-    }
+    const { user } = await callApi({
+      method: 'POST',
+      endpoint: '/login',
+      payload: { email, password },
+    });
+    setUser(user);
   };
 
   const logout = async () => {
-    try {
-      await callApi({ method: 'POST', endpoint: '/logout' });
-      setUser(undefined);
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+    await callApi({ method: 'POST', endpoint: '/logout' });
+    setUser(undefined);
   };
 
   return (
