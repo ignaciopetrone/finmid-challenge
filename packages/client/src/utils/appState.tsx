@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import callApi from './callApi';
 
 type User = {
@@ -26,6 +26,29 @@ export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
   const [isLoading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Automatically login the user if there is a valid token in cookie -> TODO: Abstract into custom hook
+    const checkAuth = async () => {
+      setLoading(true);
+      try {
+        const response = await callApi<{ user?: any }>({
+          method: 'GET',
+          endpoint: '/auth-check',
+        });
+
+        if (response.user) {
+          setUser(response.user);
+        }
+      } catch (error: any) {
+        console.error(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
       const { token, user } = await callApi({
@@ -43,7 +66,6 @@ export const StateProvider = ({ children }: any) => {
   const logout = async () => {
     try {
       setUser(undefined);
-      localStorage.removeItem('authToken');
     } catch (error) {
       console.error('Error during logout:', error);
     }

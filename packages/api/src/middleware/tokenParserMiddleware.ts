@@ -15,7 +15,7 @@ const jwtDecode = (token?: string | string[]): any | null => {
   }
 };
 
-type ParsedToken = {
+export type ParsedToken = {
   userData: {
     id: string;
     smeId: string;
@@ -27,11 +27,17 @@ type ParsedToken = {
   exp: number;
 };
 
+// Using cookies to store tokens eliminates the need to manually add them to request headers in the frontend, offering several benefits:
+//  - Simplified Frontend Code: The browser automatically includes the cookie in requests, making the frontend cleaner and simpler
+//  - Consistent Token Management: Tokens are handled and validated consistently on the server side, reducing potential errors
+//  - Enhanced Security: HTTP-only cookies are more secure than localStorage as they are not accessible via JavaScript, reducing XSS risk. Secure cookies ensure transmission over HTTPS
+//  - Automatic Inclusion in Requests: Cookies are included in requests automatically, ensuring authenticated requests without additional frontend code
+
 /**
- * Extracts the token from the `authorization` header, parses and returns it.
+ * Extracts the token from the `cookie`, parses and returns it.
  *
  * Throws `badRequest()` from `@hapi/boom`:
- * - when the headers are not found
+ * - when the token are not found
  * - when the token is not able to be parsed by `jwtDecode()`
  *
  * @throws badRequest
@@ -39,13 +45,10 @@ type ParsedToken = {
  * @returns {ParsedToken} parsed token
  */
 export const extractToken = (req: Request): ParsedToken => {
-  const authHeader = req.headers.authorization;
-  let token: string = '';
+  const token = req.cookies.authToken;
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.substring(7, authHeader.length);
-  } else {
-    throw badRequest('Expected authorization header');
+  if (!token) {
+    throw badRequest('Expected authorization cookie');
   }
 
   const parsedToken = jwtDecode(token);
@@ -59,7 +62,7 @@ export const extractToken = (req: Request): ParsedToken => {
 
 export const tokenParserMiddleware = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   try {

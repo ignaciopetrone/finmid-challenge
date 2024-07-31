@@ -17,12 +17,6 @@ const ProtectRoute = ({ route: RouteToProtect, user }: ProtectRoutePorps) => {
 const App = () => {
   const { user, resolvers } = useAppState();
 
-  useEffect(() => {
-    (async () => {
-      // await resolvers.login('gandalf.the.grey@test.com', '123code');
-    })();
-  }, []);
-
   return (
     <div className="app">
       <div className="app__header">
@@ -37,7 +31,6 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-
             <Route
               path="/"
               element={<ProtectRoute route={<Dashboard />} user={!!user} />}

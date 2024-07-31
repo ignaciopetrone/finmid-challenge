@@ -1,39 +1,56 @@
-import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import express from 'express';
+import { createYoga } from 'graphql-yoga';
+import path from 'path';
+import { SmesController, UsersController } from 'src/controllers';
+import { schema } from 'src/graphql';
 import { serve, setup } from 'swagger-ui-express';
 import yaml from 'yamljs';
-import { errorHandler, tokenParserMiddleware } from './middleware';
-import { AuthController } from './controllers';
-import { UsersController, SmesController } from 'src/controllers';
-import path from 'path';
-import { TransactionsController } from './controllers/TransactionsController';
 import { PORT } from './constants';
-import {schema} from "src/graphql";
-import {createYoga} from 'graphql-yoga'
+import { AuthController } from './controllers';
+import { TransactionsController } from './controllers/TransactionsController';
+import { errorHandler, tokenParserMiddleware } from './middleware';
+
+const allowedOrigin =
+  process.env.NODE_ENV === 'production'
+    ? 'http://localhost:4173'
+    : 'http://localhost:3300';
 
 const app = express();
-app.use(cors());
+
+app.use(
+  cors({
+    origin: allowedOrigin,
+    credentials: true,
+  })
+);
+
 app.use(express.json());
+app.use(cookieParser());
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
-// setup the swagger docs
+// Setup the swagger docs
 const swaggerDocument = yaml.load(path.join(__dirname, 'swagger.yaml'));
 app.use('/docs', serve, setup(swaggerDocument));
 
-app.post('/login', AuthController.login);
-app.get('/users', tokenParserMiddleware, UsersController.getUsers);
-app.get('/sme-data', tokenParserMiddleware, SmesController.getSme);
+// Prefix all API routes with `/api`
+app.get('/api/auth-check', AuthController.checkAuth);
+app.post('/api/login', AuthController.login);
+app.get('/api/users', tokenParserMiddleware, UsersController.getUsers);
+app.get('/api/sme-data', tokenParserMiddleware, SmesController.getSme);
 app.get(
-  '/transactions',
+  '/api/transactions',
   tokenParserMiddleware,
   TransactionsController.getTransactions
 );
 
 // GraphQL
-const yoga = createYoga({schema})
-app.use(yoga.graphqlEndpoint, yoga)
+const yoga = createYoga({ schema });
+app.use(yoga.graphqlEndpoint, yoga);
 
 app.use(errorHandler);
+
 console.log('\n 🚀\x1b[33m finmid\x1b[90m mock API online\x1b[93m :) \x1b[0m');
 console.log(
   `\n\t\x1b[33m ➜\x1b[37m Running on\x1b[33m \t\thttp://localhost:${PORT}\x1b[0m`

@@ -8,29 +8,26 @@ type ApiCallOptions = {
   method: Method;
   endpoint: string;
   payload?: any;
-  token?: string; // Add token parameter
 };
 
-const API_HOST = 'http://localhost:3000';
+const API_HOST =
+  process.env.NODE_ENV === 'production'
+    ? 'http://localhost:3000'
+    : 'http://localhost:3000';
 
 const callApi = async <T = any>({
   method,
   endpoint,
   payload,
-  token,
 }: ApiCallOptions): Promise<T> => {
   const headers: Record<string, string> = {};
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+  const url = `${API_HOST}/api${endpoint}`;
+  let fetchOptions: RequestInit = { headers, method, credentials: 'include' };
 
-  const url = API_HOST + endpoint;
-
-  let fetchOptions: RequestInit = { headers, method };
   if (payload) {
     headers['Content-Type'] = 'application/json';
-    fetchOptions = { ...fetchOptions, body: JSON.stringify(payload), method };
+    fetchOptions = { ...fetchOptions, body: JSON.stringify(payload) };
   }
 
   const response = await fetch(url, fetchOptions);
