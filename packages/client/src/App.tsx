@@ -1,48 +1,47 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { LOADING_TYPES, useAppState } from './utils/appState';
-import Login from './components/organisms/login';
+import LoadingSpinner from './components/atoms/loadingSpinner';
+import Navbar from './components/molecules/navbar';
 import Dashboard from './components/organisms/dashboard';
-import { wait } from './utils/wait';
-import Button from './components/atoms/button';
+import Login from './components/organisms/login';
+import { LOADING_TYPES, useAppState } from './utils/appState';
 
-type ProtectRoutePorps = { route: ReactNode; user?: boolean };
-
-const ProtectRoute = ({ route: RouteToProtect, user }: ProtectRoutePorps) => {
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  } else {
-    return <>{RouteToProtect}</>;
-  }
+type ProtectRoutePorps = {
+  route: ReactNode;
+  user?: boolean;
 };
 
 const App = () => {
-  const { user, resolvers, isLoading, setLoading } = useAppState();
+  const { user, isLoading } = useAppState();
 
-  const onLogout = async () => {
-    setLoading(LOADING_TYPES.authLogout);
-    try {
-      await wait(2000);
-      await resolvers.logout();
-    } catch (error: any) {
-      console.error('Error during logout - ', error.message);
-    } finally {
-      setLoading(LOADING_TYPES.off);
+  const ProtectRoute = ({ route: RouteToProtect, user }: ProtectRoutePorps) => {
+    if (!user) {
+      return <Navigate to="/login" replace />;
+    } else {
+      return <>{RouteToProtect}</>;
     }
   };
+
+  if (isLoading === LOADING_TYPES.authCheck) {
+    return (
+      <div className="app">
+        <div className="app__header">
+          <Navbar />
+        </div>
+        <div className="app__body">
+          <div className="app__loading-spinner">
+            <LoadingSpinner />
+          </div>
+        </div>
+        <div className="app__footer">FOOTER</div>
+      </div>
+    );
+  }
 
   return (
     <div className="app">
       <div className="app__header">
-        {user && <p>Welcome {user?.name}</p>}
-        {user && (
-          <Button
-            isLoading={isLoading === LOADING_TYPES.authLogout}
-            onClick={onLogout}
-          >
-            Sign out
-          </Button>
-        )}
+        <Navbar />
       </div>
       <div className="app__body">
         <BrowserRouter>

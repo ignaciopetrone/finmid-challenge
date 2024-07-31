@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import callApi from './callApi';
+import { wait } from './wait';
 
 type User = {
   id: string;
@@ -31,13 +32,13 @@ export const LOADING_TYPES = {
 
 export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
-  const [isLoading, setLoading] = useState('');
+  const [isLoading, setLoading] = useState(LOADING_TYPES.authCheck);
 
   useEffect(() => {
     // Automatically login the user if there is a valid token in cookie -> TODO: Abstract into custom hook
     const checkAuth = async () => {
-      setLoading(LOADING_TYPES.authCheck);
       try {
+        await wait(2000);
         const response = await callApi<{ user?: any }>({
           method: 'GET',
           endpoint: '/auth-check',
@@ -57,6 +58,7 @@ export const StateProvider = ({ children }: any) => {
   }, []);
 
   const login = async (email: string, password: string) => {
+    await wait(2000);
     const { user } = await callApi({
       method: 'POST',
       endpoint: '/login',
@@ -66,6 +68,7 @@ export const StateProvider = ({ children }: any) => {
   };
 
   const logout = async () => {
+    await wait(2000);
     await callApi({ method: 'POST', endpoint: '/logout' });
     setUser(undefined);
   };

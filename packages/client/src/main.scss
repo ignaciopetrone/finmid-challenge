@@ -1,3 +1,5 @@
+@import './utils/variables.scss';
+
 html,
 body,
 #root,
@@ -13,14 +15,20 @@ body,
   flex-direction: column;
 
   &__header {
-    background-color: bisque;
+    background-color: $headerColor;
     min-height: 110px;
     display: flex;
     justify-content: center;
   }
 
+  &__loading-spinner {
+    align-self: center;
+  }
+
   &__body {
     flex-grow: 1;
+    justify-content: center;
+    display: flex;
   }
 
   &__body,
@@ -33,7 +41,7 @@ body,
   &__footer {
     height: 110px;
     display: grid;
-    background-color: bisque;
+    background-color: $footerColor;
     p {
       margin: auto 0 auto 80px;
     }

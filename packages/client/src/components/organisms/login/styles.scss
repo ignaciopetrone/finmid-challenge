@@ -1,15 +1,16 @@
 @import '../../../utils/variables.scss';
 
-.auth {
+.login {
   background-color: rgba(255, 255, 255, 0.733);
   border-radius: $borderRadius;
   border: 1px solid black;
-  padding: 30px 10px 15px 10px;
+  padding: 30px;
   width: 100%;
   display: flex;
   flex-direction: column;
   max-width: 500px;
   margin: 100px auto;
+  height: fit-content;
 
   &__headline {
     text-align: center;
@@ -17,18 +18,18 @@
     font-size: 35px;
   }
 
+  &__button {
+    margin-top: 20px;
+    margin-bottom: 0px;
+  }
+
   @media (max-width: $mobile) {
     height: 100%;
     width: 100%;
-    padding: 30px 0;
+    padding: 30px 10px;
     margin: 0;
     border-radius: 0;
     border: none;
-
-    &__button {
-      margin-top: 20px !important;
-      margin-bottom: 0px !important;
-    }
 
     &__button-center {
       text-align: center;

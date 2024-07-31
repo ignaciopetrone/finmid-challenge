@@ -26,7 +26,6 @@ const Login = () => {
   const onSubmit = async (values: { email: string; password: string }) => {
     setLoading(LOADING_TYPES.authLogin);
     try {
-      await wait(2000);
       await resolvers.login(values.email, values.password);
     } catch (error: any) {
       console.error('Error during login - ', error.message);
@@ -36,10 +35,10 @@ const Login = () => {
   };
 
   return (
-    <div className="auth">
+    <div className="login">
       <Formik initialValues={initialValues} onSubmit={onSubmit} noValidate>
-        <Form className="auth__form">
-          <h2 className="auth__headline">Sign In</h2>
+        <Form className="login__form">
+          <h2 className="login__headline">Sign In</h2>
           <div className="form__field-container">
             <Field
               component={TextField}
@@ -58,7 +57,7 @@ const Login = () => {
               validate={(value: string) => runValidation(value, 'password')}
             />
           </div>
-          <div className="form__field-container auth__button">
+          <div className="form__field-container login__button">
             <Button
               type="submit"
               isLoading={isLoading === LOADING_TYPES.authLogin}
