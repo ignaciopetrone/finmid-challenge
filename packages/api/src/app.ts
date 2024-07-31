@@ -34,9 +34,12 @@ app.use('/static', express.static(path.join(__dirname, 'static')));
 const swaggerDocument = yaml.load(path.join(__dirname, 'swagger.yaml'));
 app.use('/docs', serve, setup(swaggerDocument));
 
-// Prefix all API routes with `/api`
+// Auth
 app.get('/api/auth-check', AuthController.checkAuth);
 app.post('/api/login', AuthController.login);
+app.post('/api/logout', AuthController.logout);
+
+// Secured with middleware
 app.get('/api/users', tokenParserMiddleware, UsersController.getUsers);
 app.get('/api/sme-data', tokenParserMiddleware, SmesController.getSme);
 app.get(

@@ -7,7 +7,7 @@ import users from 'src/data/users.json';
 import { ParsedToken } from 'src/middleware';
 
 const INCORRECT_LOGIN = 'Incorrect login or password';
-const TOKEN_LIFE = 20 * 1000;
+const TOKEN_LIFE = 60 * 60 * 1000;
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies['authToken'];
@@ -55,7 +55,20 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const logout = (req: Request, res: Response) => {
+  // Clear the cookie by setting its expiration date to the past
+  res.cookie('authToken', '', {
+    maxAge: -1,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+  });
+
+  // Send a success response
+  res.status(200).json({ message: 'Successfully logged out' });
+};
+
 export const AuthController = {
   checkAuth,
   login,
+  logout,
 };

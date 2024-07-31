@@ -26,7 +26,7 @@ const Login = () => {
   const onSubmit = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      await wait(3000);
+      await wait(2000);
       await resolvers.login(values.email, values.password);
       setLoading(false);
     } catch (error: any) {}

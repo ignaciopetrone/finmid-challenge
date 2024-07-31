@@ -51,12 +51,11 @@ export const StateProvider = ({ children }: any) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const { token, user } = await callApi({
+      const { user } = await callApi({
         method: 'POST',
         endpoint: '/login',
         payload: { email, password },
       });
-      localStorage.setItem('authToken', token);
       setUser(user);
     } catch (error) {
       console.error('Error during login:', error);
@@ -65,6 +64,7 @@ export const StateProvider = ({ children }: any) => {
 
   const logout = async () => {
     try {
+      await callApi({ method: 'POST', endpoint: '/logout' });
       setUser(undefined);
     } catch (error) {
       console.error('Error during logout:', error);
