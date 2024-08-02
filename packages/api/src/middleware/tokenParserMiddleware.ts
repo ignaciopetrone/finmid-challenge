@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { badRequest } from '@hapi/boom';
+import { badRequest, unauthorized } from '@hapi/boom';
 
 const jwtDecode = (token?: string | string[]): any | null => {
   if (!token || typeof token !== 'string') {
@@ -57,6 +57,11 @@ export const extractToken = (req: Request): ParsedToken => {
     throw badRequest('Token could not be parsed');
   }
 
+  const currentTime = Math.floor(Date.now() / 1000);
+  if (parsedToken.exp < currentTime) {
+    throw unauthorized('Token expired');
+  }
+
   return parsedToken;
 };
 
@@ -70,6 +75,15 @@ export const tokenParserMiddleware = (
     req.body.userData = parsedToken.userData;
     return next();
   } catch (e: any) {
+    console.log('ERROR', e.message);
+    if (
+      e.output &&
+      e.output.statusCode === 401 &&
+      e.message === 'Token expired'
+    ) {
+      // Redirect to login page
+      return _res.redirect('/login');
+    }
     return next(e);
   }
 };

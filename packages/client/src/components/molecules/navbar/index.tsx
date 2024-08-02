@@ -4,7 +4,7 @@ import Button from '../../atoms/button';
 import './styles.scss';
 
 const Navbar = () => {
-  const { user, resolvers, isLoading, setLoading } = useAppState();
+  const { user, sme, resolvers, isLoading, setLoading } = useAppState();
 
   const onLogout = async () => {
     setLoading(LOADING_TYPES.authLogout);
@@ -20,7 +20,8 @@ const Navbar = () => {
   return (
     <div className="navbar">
       <img className="navbar__logo" src={getAssetUrl('vite.svg')} alt="logo" />
-      {user && <p className="navbar__user-name">Welcome {user?.name}</p>}
+      {user && <p className="navbar__user-name">USER: {user?.name}</p>}
+      {sme && <p className="navbar__legal-name">SME: {sme?.legalName}</p>}
       {user && (
         <Button
           isTertiary

@@ -3,12 +3,13 @@ import cors from 'cors';
 import express from 'express';
 import { createYoga } from 'graphql-yoga';
 import path from 'path';
-import { SmesController, UsersController } from 'src/controllers';
 import { schema } from 'src/graphql';
 import { serve, setup } from 'swagger-ui-express';
 import yaml from 'yamljs';
 import { PORT } from './constants';
 import { AuthController } from './controllers';
+import { SmesController } from './controllers/SmesController';
+import { UsersController } from './controllers/UsersController';
 import { TransactionsController } from './controllers/TransactionsController';
 import { errorHandler, tokenParserMiddleware } from './middleware';
 
@@ -28,6 +29,7 @@ app.use(
 
 app.use(express.json());
 app.use(cookieParser());
+
 app.use('/static', express.static(path.join(__dirname, 'static')));
 
 // Setup the swagger docs
@@ -39,9 +41,8 @@ app.get('/api/auth-check', AuthController.checkAuth);
 app.post('/api/login', AuthController.login);
 app.post('/api/logout', AuthController.logout);
 
-// Secured with middleware
-app.get('/api/users', tokenParserMiddleware, UsersController.getUsers);
 app.get('/api/sme-data', tokenParserMiddleware, SmesController.getSme);
+app.get('/api/users', tokenParserMiddleware, UsersController.getUsers);
 app.get(
   '/api/transactions',
   tokenParserMiddleware,

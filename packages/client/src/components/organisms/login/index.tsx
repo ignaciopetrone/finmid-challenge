@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOADING_TYPES, useAppState } from '../../../utils/appState';
 import { runValidation } from '../../../utils/validations';
-import { wait } from '../../../utils/wait';
 import Button from '../../atoms/button';
 import TextField from '../../molecules/TextField';
 import './styles.scss';

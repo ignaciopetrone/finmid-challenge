@@ -10,7 +10,7 @@ const getSme = async (req: Request, res: Response) => {
     throw notFound('SME not found');
   }
 
-  res.json(sme);
+  res.status(200).json(sme);
 };
 
 export const SmesController = {

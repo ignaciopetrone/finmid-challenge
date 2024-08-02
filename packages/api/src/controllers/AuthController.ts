@@ -7,7 +7,7 @@ import users from 'src/data/users.json';
 import { ParsedToken } from 'src/middleware';
 
 const INCORRECT_LOGIN = 'Incorrect login or password';
-const TOKEN_LIFE = 60 * 60 * 1000;
+const TOKEN_LIFE = 10 * 60 * 1000;
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies['authToken'];
@@ -18,8 +18,12 @@ const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY) as ParsedToken;
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (decoded.exp < currentTime) {
+      throw unauthorized('Token expired');
+    }
     res.status(200).json({ user: decoded.userData });
-  } catch (error) {
+  } catch (error: any) {
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
