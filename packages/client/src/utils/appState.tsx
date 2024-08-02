@@ -55,7 +55,8 @@ export type ContextValue = {
   resolvers: {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    searchTransactions: (params: SearchParameters) => Promise<void>;
+    getUserName: (id: string) => Promise<string>;
+    searchTransactions: (params: SearchParameters) => Promise<string>;
   };
 };
 
@@ -66,6 +67,8 @@ export const LOADING_TYPES = {
   authCheck: 'auth:check',
   authLogin: 'auth:login',
   authLogout: 'auth:logout',
+  transactionsFetch: 'transactions:fetch',
+  transactionFetch: 'transaction:fetch',
 };
 
 export const StateProvider = ({ children }: any) => {
@@ -146,6 +149,22 @@ export const StateProvider = ({ children }: any) => {
     } catch (erro) {}
   };
 
+  const getUserName = async (id: string) => {
+    const queryParams = new URLSearchParams();
+    queryParams.append('userId', id);
+    const endpoint = `/user?${queryParams.toString()}`;
+
+    try {
+      const userName = await callApi({
+        method: 'GET',
+        endpoint,
+      });
+      return userName;
+    } catch (error: any) {
+      console.error(error.message);
+    }
+  };
+
   const getTransactions = async ({
     status,
     limit = 10,
@@ -197,6 +216,7 @@ export const StateProvider = ({ children }: any) => {
         resolvers: {
           login,
           logout,
+          getUserName,
           searchTransactions: async (params: SearchParameters) =>
             setSearchParameters({ ...searchParameters, ...params }),
         },

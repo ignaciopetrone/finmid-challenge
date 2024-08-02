@@ -1,9 +1,10 @@
 import { ReactNode } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import LoadingSpinner from './components/atoms/loadingSpinner';
 import Navbar from './components/molecules/navbar';
 import Dashboard from './components/organisms/dashboard';
 import Login from './components/organisms/login';
+import TransactionDetails from './components/organisms/transactionDetails';
 import { LOADING_TYPES, useAppState } from './utils/appState';
 
 type ProtectRoutePorps = {
@@ -45,15 +46,19 @@ const App = () => {
         <Navbar />
       </div>
       <div className="app__body">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={<ProtectRoute route={<Dashboard />} user={!!user} />}
-            />
-          </Routes>
-        </BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={<ProtectRoute route={<Dashboard />} user={!!user} />}
+          />
+          <Route
+            path="/transactions/:id"
+            element={
+              <ProtectRoute route={<TransactionDetails />} user={!!user} />
+            }
+          />
+        </Routes>
       </div>
       <div className="app__footer">FOOTER</div>
     </div>

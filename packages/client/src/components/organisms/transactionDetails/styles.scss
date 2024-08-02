@@ -1,0 +1,10 @@
+@import '../../../utils/variables.scss';
+.transaction-details {
+  background-color: $cardBackgroundColor;
+  height: min-content;
+  width: 100%;
+
+  &__img {
+    height: 200px;
+  }
+}

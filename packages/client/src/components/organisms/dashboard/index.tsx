@@ -2,6 +2,7 @@ import { ChangeEvent } from 'react';
 import { useAppState } from '../../../utils/appState';
 import TransactionCard from '../../atoms/transactionCard';
 import './styles.scss';
+import { Link } from 'react-router-dom';
 
 const statusOptions = [
   { value: 'ALL', label: 'All' },
@@ -75,10 +76,12 @@ const Dashboard = () => {
           </select>
         </div>
       </div>
-      <div className="dashboard__transactions"></div>
+
       <div className="dashboard__transactions">
         {transactions.map((transaction) => (
-          <TransactionCard key={transaction.id} transaction={transaction} />
+          <Link to={`/transactions/${transaction.id}`} key={transaction.id}>
+            <TransactionCard transaction={transaction} />
+          </Link>
         ))}
       </div>
     </div>

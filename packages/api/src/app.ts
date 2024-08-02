@@ -9,8 +9,8 @@ import yaml from 'yamljs';
 import { PORT } from './constants';
 import { AuthController } from './controllers';
 import { SmesController } from './controllers/SmesController';
-import { UsersController } from './controllers/UsersController';
 import { TransactionsController } from './controllers/TransactionsController';
+import { UsersController } from './controllers/UsersController';
 import { errorHandler, tokenParserMiddleware } from './middleware';
 
 const allowedOrigin =
@@ -42,6 +42,7 @@ app.post('/api/login', AuthController.login);
 app.post('/api/logout', AuthController.logout);
 
 app.get('/api/sme-data', tokenParserMiddleware, SmesController.getSme);
+app.get('/api/user', tokenParserMiddleware, UsersController.getUserName);
 app.get('/api/users', tokenParserMiddleware, UsersController.getUsers);
 app.get(
   '/api/transactions',

@@ -72,7 +72,7 @@
   @media (max-width: $tablet) {
     flex-direction: row;
     height: 100px;
-    width: 100%;
+    width: -webkit-fill-available;
 
     &__container {
       width: 100%;
