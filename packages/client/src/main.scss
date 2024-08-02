@@ -7,15 +7,16 @@ body,
   min-height: 100vh;
   margin: 0;
   padding: 0;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .app {
-  background-color: #eee;
+  background-color: $bodyBackgroundColor;
   display: flex;
   flex-direction: column;
 
   &__header {
-    background-color: $headerColor;
+    background-color: $headerBackgroundColor;
     min-height: 110px;
     display: flex;
     justify-content: center;
@@ -41,7 +42,7 @@ body,
   &__footer {
     height: 110px;
     display: grid;
-    background-color: $footerColor;
+    background-color: $footerBackgroundColor;
     p {
       margin: auto 0 auto 80px;
     }

@@ -23,6 +23,7 @@ const App = () => {
   };
 
   if (isLoading === LOADING_TYPES.authCheck) {
+    // Duplicated JSX here i know, just to handle initial load of the app
     return (
       <div className="app">
         <div className="app__header">

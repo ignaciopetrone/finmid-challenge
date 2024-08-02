@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import callApi from './callApi';
 import { wait } from './wait';
 
-type Transaction = {
+export type Transaction = {
   id: string;
   userId: string;
   smeId: string;
@@ -31,6 +31,7 @@ type User = {
 export type ContextValue = {
   user?: User;
   sme?: Sme;
+  transactions: Transaction[];
   token?: User;
   isLoading: string;
   setLoading: (isLoading: string) => void;
@@ -111,7 +112,7 @@ export const StateProvider = ({ children }: any) => {
   };
 
   const getSme = async () => {
-    await wait(3000);
+    // await wait(3000);
     const sme = await callApi({
       method: 'GET',
       endpoint: '/sme-data',
@@ -122,13 +123,13 @@ export const StateProvider = ({ children }: any) => {
   };
 
   const getTransactions = async () => {
-    await wait(3000);
+    // await wait(3000);
     const transactions = await callApi({
       method: 'GET',
       endpoint: '/transactions',
     });
     try {
-      setTransactions(transactions);
+      setTransactions(transactions.data);
     } catch (erro) {}
   };
 
@@ -140,6 +141,7 @@ export const StateProvider = ({ children }: any) => {
       value={{
         user,
         sme,
+        transactions,
         isLoading,
         setLoading,
         resolvers: { login, logout },

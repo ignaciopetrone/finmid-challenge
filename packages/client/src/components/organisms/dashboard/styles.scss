@@ -1,0 +1,11 @@
+@import '../../../utils/variables.scss';
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+
+  &__transactions {
+    display: flex;
+    flex-wrap: wrap;
+  }
+}
