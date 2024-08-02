@@ -1,6 +1,21 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import callApi from './callApi';
 import { wait } from './wait';
+import calculatePagination from './calculatePagination';
+
+export type SearchParameters = {
+  status?: 'REJECTED' | 'PENDING' | 'COMPLETED' | 'REVERSED';
+  userId?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type Pagination = {
+  currentPage: number;
+  totalPages: number;
+  nextOffset: number;
+  prevOffset: number;
+};
 
 export type Transaction = {
   id: string;
@@ -31,6 +46,7 @@ type User = {
 export type ContextValue = {
   user?: User;
   sme?: Sme;
+  pagination?: Pagination;
   transactions: Transaction[];
   token?: User;
   isLoading: string;
@@ -38,6 +54,7 @@ export type ContextValue = {
   resolvers: {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    getTransactions: (params: SearchParameters) => Promise<void>;
   };
 };
 
@@ -54,6 +71,7 @@ export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
   const [sme, setSME] = useState<Sme>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [pagination, setPagination] = useState<Pagination>();
   const [isLoading, setLoading] = useState(LOADING_TYPES.authCheck);
 
   useEffect(() => {
@@ -90,7 +108,7 @@ export const StateProvider = ({ children }: any) => {
   useEffect(() => {
     if (sme) {
       (async () => {
-        await getTransactions();
+        await getTransactions({});
       })();
     }
   }, [sme]);
@@ -122,29 +140,44 @@ export const StateProvider = ({ children }: any) => {
     } catch (erro) {}
   };
 
-  const getTransactions = async () => {
-    // await wait(3000);
-    const transactions = await callApi({
-      method: 'GET',
-      endpoint: '/transactions',
-    });
-    try {
-      setTransactions(transactions.data);
-    } catch (erro) {}
-  };
+  const getTransactions = async ({
+    status,
+    limit = 10,
+    offset = 0,
+  }: SearchParameters) => {
+    const queryParams = new URLSearchParams();
+    if (status) queryParams.append('status', status);
+    if (user?.id) queryParams.append('userId', user?.id);
+    if (limit) queryParams.append('limit', limit.toString());
+    if (offset) queryParams.append('offset', offset.toString());
 
-  console.log('sme', sme);
-  console.log('transactions', transactions);
+    const endpoint = `/transactions?${queryParams.toString()}`;
+
+    try {
+      const response = await callApi({
+        method: 'GET',
+        endpoint,
+      });
+
+      setTransactions(response.data);
+      const { limit, offset, total } = response.meta;
+      const getPaginationState = calculatePagination(limit, offset, total);
+      setPagination(getPaginationState);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
+  };
 
   return (
     <StateContext.Provider
       value={{
         user,
         sme,
+        pagination,
         transactions,
         isLoading,
         setLoading,
-        resolvers: { login, logout },
+        resolvers: { login, logout, getTransactions },
       }}
     >
       {children}

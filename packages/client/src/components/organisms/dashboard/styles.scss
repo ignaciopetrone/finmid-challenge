@@ -4,6 +4,32 @@
   display: flex;
   flex-direction: column;
 
+  &__head {
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: bisque;
+  }
+
+  &__pagination {
+    font-size: 20px;
+    margin-bottom: 10px;
+    :nth-child(2) {
+      margin: 0 10px;
+    }
+  }
+
+  &__previous,
+  &__next {
+    cursor: pointer;
+    &:hover {
+      // text-decoration: underline;
+      font-weight: bold;
+    }
+  }
+
   &__transactions {
     display: flex;
     flex-wrap: wrap;
