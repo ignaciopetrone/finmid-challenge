@@ -1,10 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import calculatePagination from './calculatePagination';
 import callApi from './callApi';
 import { wait } from './wait';
-import calculatePagination from './calculatePagination';
 
 export type SearchParameters = {
-  status?: 'REJECTED' | 'PENDING' | 'COMPLETED' | 'REVERSED';
+  status?: 'ALL' | 'REJECTED' | 'PENDING' | 'COMPLETED' | 'REVERSED';
   userId?: string;
   limit?: number;
   offset?: number;
@@ -50,11 +50,12 @@ export type ContextValue = {
   transactions: Transaction[];
   token?: User;
   isLoading: string;
+  searchParameters: SearchParameters;
   setLoading: (isLoading: string) => void;
   resolvers: {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    getTransactions: (params: SearchParameters) => Promise<void>;
+    searchTransactions: (params: SearchParameters) => Promise<void>;
   };
 };
 
@@ -71,7 +72,12 @@ export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
   const [sme, setSME] = useState<Sme>();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+
   const [pagination, setPagination] = useState<Pagination>();
+  const [searchParameters, setSearchParameters] = useState<SearchParameters>(
+    {}
+  );
+
   const [isLoading, setLoading] = useState(LOADING_TYPES.authCheck);
 
   useEffect(() => {
@@ -146,7 +152,13 @@ export const StateProvider = ({ children }: any) => {
     offset = 0,
   }: SearchParameters) => {
     const queryParams = new URLSearchParams();
-    if (status) queryParams.append('status', status);
+    if (status) {
+      if (status === 'ALL') {
+        queryParams.delete('status');
+      } else {
+        queryParams.append('status', status);
+      }
+    }
     if (user?.id) queryParams.append('userId', user?.id);
     if (limit) queryParams.append('limit', limit.toString());
     if (offset) queryParams.append('offset', offset.toString());
@@ -168,6 +180,10 @@ export const StateProvider = ({ children }: any) => {
     }
   };
 
+  useEffect(() => {
+    getTransactions(searchParameters);
+  }, [searchParameters]);
+
   return (
     <StateContext.Provider
       value={{
@@ -176,8 +192,14 @@ export const StateProvider = ({ children }: any) => {
         pagination,
         transactions,
         isLoading,
+        searchParameters,
         setLoading,
-        resolvers: { login, logout, getTransactions },
+        resolvers: {
+          login,
+          logout,
+          searchTransactions: async (params: SearchParameters) =>
+            setSearchParameters({ ...searchParameters, ...params }),
+        },
       }}
     >
       {children}
