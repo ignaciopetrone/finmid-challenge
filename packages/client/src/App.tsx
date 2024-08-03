@@ -7,21 +7,8 @@ import Login from './components/organisms/login';
 import TransactionDetails from './components/organisms/transactionDetails';
 import { LOADING_TYPES, useAppState } from './utils/appState';
 
-type ProtectRoutePorps = {
-  route: ReactNode;
-  user?: boolean;
-};
-
 const App = () => {
   const { user, isLoading } = useAppState();
-
-  const ProtectRoute = ({ route: RouteToProtect, user }: ProtectRoutePorps) => {
-    if (!user) {
-      return <Navigate to="/login" replace />;
-    } else {
-      return <>{RouteToProtect}</>;
-    }
-  };
 
   if (isLoading === LOADING_TYPES.authCheck) {
     // Duplicated JSX here i know, just to handle initial load of the app
@@ -50,13 +37,11 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route
             path="/"
-            element={<ProtectRoute route={<Dashboard />} user={!!user} />}
+            element={user ? <Dashboard /> : <Navigate to="/login" />}
           />
           <Route
             path="/transactions/:id"
-            element={
-              <ProtectRoute route={<TransactionDetails />} user={!!user} />
-            }
+            element={user ? <TransactionDetails /> : <Navigate to="/login" />}
           />
         </Routes>
       </div>
