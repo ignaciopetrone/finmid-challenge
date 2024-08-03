@@ -7,7 +7,7 @@ import users from 'src/data/users.json';
 import { ParsedToken } from 'src/middleware';
 
 const INCORRECT_LOGIN = 'Incorrect login or password';
-const TOKEN_LIFE = 10 * 60 * 1000;
+const TOKEN_LIFE = 10 * 1000;
 
 const checkAuth = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies['authToken'];

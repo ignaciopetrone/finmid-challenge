@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import calculatePagination from './calculatePagination';
-import callApi from './callApi';
+import callApi, { ApiError } from './callApi';
 import { wait } from './wait';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 export type SearchParameters = {
   status?: 'ALL' | 'REJECTED' | 'PENDING' | 'COMPLETED' | 'REVERSED';
@@ -74,6 +75,7 @@ export const LOADING_TYPES = {
 export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
   const [sme, setSME] = useState<Sme>();
+  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [pagination, setPagination] = useState<Pagination>();
@@ -124,29 +126,47 @@ export const StateProvider = ({ children }: any) => {
 
   const login = async (email: string, password: string) => {
     await wait(2000);
-    const { user } = await callApi({
-      method: 'POST',
-      endpoint: '/login',
-      payload: { email, password },
-    });
-    setUser(user);
+    try {
+      const { user } = await callApi({
+        method: 'POST',
+        endpoint: '/login',
+        payload: { email, password },
+      });
+      setUser(user);
+    } catch ({ statusCode, message }: any) {
+      console.error('Error during login:', statusCode, message);
+    }
   };
 
   const logout = async () => {
-    await wait(2000);
-    await callApi({ method: 'POST', endpoint: '/logout' });
-    setUser(undefined);
+    await wait(1000);
+    try {
+      await callApi({ method: 'POST', endpoint: '/logout' });
+      setUser(undefined);
+      setSME(undefined);
+      setTransactions([]);
+      navigate('/login');
+    } catch ({ statusCode, message }: any) {
+      console.error('Error during logout:', statusCode, message);
+    }
   };
 
   const getSme = async () => {
-    // await wait(3000);
     const sme = await callApi({
       method: 'GET',
       endpoint: '/sme-data',
     });
     try {
       setSME(sme);
-    } catch (erro) {}
+    } catch ({ statusCode, message }: any) {
+      console.error('Error fetching sme:', statusCode, message);
+      if (
+        statusCode === 401 &&
+        message === 'Your session expired, please log in again.'
+      ) {
+        logout();
+      }
+    }
   };
 
   const getUserName = async (id: string) => {
@@ -160,8 +180,14 @@ export const StateProvider = ({ children }: any) => {
         endpoint,
       });
       return userName;
-    } catch (error: any) {
-      console.error(error.message);
+    } catch ({ statusCode, message }: any) {
+      console.error('Error fetching userName:', statusCode, message);
+      if (
+        statusCode === 401 &&
+        message === 'Your session expired, please log in again.'
+      ) {
+        logout();
+      }
     }
   };
 
@@ -194,12 +220,22 @@ export const StateProvider = ({ children }: any) => {
       const { limit, offset, total } = response.meta;
       const getPaginationState = calculatePagination(limit, offset, total);
       setPagination(getPaginationState);
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
+    } catch ({ statusCode, message }: any) {
+      console.error('Error fetching transactions:', statusCode, message);
+      if (
+        statusCode === 401 &&
+        message === 'Your session expired, please log in again.'
+      ) {
+        logout();
+      }
     }
   };
 
   useEffect(() => {
+    if (!user) {
+      return;
+    }
+
     getTransactions(searchParameters);
   }, [searchParameters]);
 

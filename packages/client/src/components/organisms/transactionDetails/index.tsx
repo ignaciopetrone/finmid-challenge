@@ -39,7 +39,7 @@ const TransactionDetails = () => {
       }
     })();
     setLoading(LOADING_TYPES.off);
-  }, []);
+  }, [transactions]);
 
   if (isLoading === LOADING_TYPES.transactionFetch || transaction === null) {
     return (

@@ -48,7 +48,7 @@ export const extractToken = (req: Request): ParsedToken => {
   const token = req.cookies.authToken;
 
   if (!token) {
-    throw badRequest('Expected authorization cookie');
+    throw unauthorized('Your session expired, please log in again.');
   }
 
   const parsedToken = jwtDecode(token);
@@ -67,7 +67,7 @@ export const extractToken = (req: Request): ParsedToken => {
 
 export const tokenParserMiddleware = (
   req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction
 ) => {
   try {
@@ -75,15 +75,6 @@ export const tokenParserMiddleware = (
     req.body.userData = parsedToken.userData;
     return next();
   } catch (e: any) {
-    console.log('ERROR', e.message);
-    if (
-      e.output &&
-      e.output.statusCode === 401 &&
-      e.message === 'Token expired'
-    ) {
-      // Redirect to login page
-      return _res.redirect('/login');
-    }
     return next(e);
   }
 };

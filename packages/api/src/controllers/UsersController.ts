@@ -30,8 +30,6 @@ const getUserName = async (req: Request, res: Response) => {
     .filter((user) => user.id === userId)
     .map((user) => user.name);
 
-  console.log('userId ', userId);
-
   res.status(200).json(userName);
 };
 
