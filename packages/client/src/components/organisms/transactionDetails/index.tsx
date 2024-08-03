@@ -1,41 +1,54 @@
+import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   LOADING_TYPES,
   Transaction,
   useAppState,
 } from '../../../utils/appState';
+import { formatDate, formatPrice } from '../../../utils/formats';
 import { wait } from '../../../utils/wait';
 import LoadingSpinner from '../../atoms/loadingSpinner';
+import { addNotification } from '../notifications';
 import './styles.scss';
-import { formatDate, formatPrice } from '../../../utils/formats';
-import classNames from 'classnames';
 
 const TransactionDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { transactions, isLoading, setLoading, resolvers } = useAppState();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [userName, setUserName] = useState<string>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // TODO Ideally here we would hit the '/api/transactions/:id' endpoint
     setLoading(LOADING_TYPES.transactionFetch);
-    if (!id) {
+    if (!id || !transactions || transactions.length === 0) {
       return;
     }
 
     (async () => {
       await wait(1000);
-      const selectedTransaction = await transactions.find((t) => t.id === id);
-
-      if (selectedTransaction) {
-        const userName = await resolvers.getUserName(
-          selectedTransaction?.userId
-        );
-        setTransaction(selectedTransaction);
-        if (userName) {
-          setUserName(userName);
+      try {
+        const selectedTransaction = transactions.find((t) => t.id === id);
+        if (!selectedTransaction) {
+          addNotification({
+            id: `notification-${Date.now()}`,
+            message: 'This transaction does not exist',
+            type: 'error',
+          });
+          navigate('/');
+          return;
+        } else {
+          setTransaction(selectedTransaction);
+          const userName = await resolvers.getUserName(
+            selectedTransaction?.userId
+          );
+          if (userName) {
+            setUserName(userName);
+          }
         }
+      } catch ({ statusCode, message }: any) {
+        console.error('Error fetching userName:', statusCode, message);
       }
     })();
     setLoading(LOADING_TYPES.off);

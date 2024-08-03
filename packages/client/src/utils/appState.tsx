@@ -3,6 +3,10 @@ import calculatePagination from './calculatePagination';
 import callApi, { ApiError } from './callApi';
 import { wait } from './wait';
 import { Navigate, useNavigate } from 'react-router-dom';
+import {
+  addNotification,
+  useNotifications,
+} from '../components/organisms/notifications';
 
 export type SearchParameters = {
   status?: 'ALL' | 'REJECTED' | 'PENDING' | 'COMPLETED' | 'REVERSED';
@@ -57,7 +61,7 @@ export type ContextValue = {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     getUserName: (id: string) => Promise<string>;
-    searchTransactions: (params: SearchParameters) => Promise<string>;
+    searchTransactions: (params: SearchParameters) => Promise<void>;
   };
 };
 
@@ -76,6 +80,7 @@ export const StateProvider = ({ children }: any) => {
   const [user, setUser] = useState<User>();
   const [sme, setSME] = useState<Sme>();
   const navigate = useNavigate();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [pagination, setPagination] = useState<Pagination>();
@@ -133,21 +138,43 @@ export const StateProvider = ({ children }: any) => {
         payload: { email, password },
       });
       setUser(user);
+      addNotification({
+        id: `notification-${Date.now()}`,
+        message: `Welcome ${user.name}`,
+        type: 'success',
+      });
     } catch ({ statusCode, message }: any) {
       console.error('Error during login:', statusCode, message);
+      addNotification({
+        id: `notification-${Date.now()}`,
+        message,
+        type: 'error',
+      });
     }
   };
 
-  const logout = async () => {
+  const logout = async (noGoodBye?: boolean) => {
     await wait(1000);
     try {
       await callApi({ method: 'POST', endpoint: '/logout' });
+      if (!noGoodBye) {
+        addNotification({
+          id: `notification-${Date.now()}`,
+          message: `Good bye ${user?.name} :/`,
+          type: 'success',
+        });
+      }
       setUser(undefined);
       setSME(undefined);
       setTransactions([]);
       navigate('/login');
     } catch ({ statusCode, message }: any) {
       console.error('Error during logout:', statusCode, message);
+      addNotification({
+        id: `notification-${Date.now()}`,
+        message,
+        type: 'error',
+      });
     }
   };
 
@@ -160,11 +187,16 @@ export const StateProvider = ({ children }: any) => {
       setSME(sme);
     } catch ({ statusCode, message }: any) {
       console.error('Error fetching sme:', statusCode, message);
+      addNotification({
+        id: `notification-${Date.now()}`,
+        message,
+        type: 'error',
+      });
       if (
         statusCode === 401 &&
         message === 'Your session expired, please log in again.'
       ) {
-        logout();
+        logout(true);
       }
     }
   };
@@ -182,11 +214,16 @@ export const StateProvider = ({ children }: any) => {
       return userName;
     } catch ({ statusCode, message }: any) {
       console.error('Error fetching userName:', statusCode, message);
+      addNotification({
+        id: `notification-${Date.now()}`,
+        message,
+        type: 'error',
+      });
       if (
         statusCode === 401 &&
         message === 'Your session expired, please log in again.'
       ) {
-        logout();
+        logout(true);
       }
     }
   };
@@ -222,11 +259,16 @@ export const StateProvider = ({ children }: any) => {
       setPagination(getPaginationState);
     } catch ({ statusCode, message }: any) {
       console.error('Error fetching transactions:', statusCode, message);
+      addNotification({
+        id: `notification-${Date.now()}`,
+        message,
+        type: 'error',
+      });
       if (
         statusCode === 401 &&
         message === 'Your session expired, please log in again.'
       ) {
-        logout();
+        logout(true);
       }
     }
   };
